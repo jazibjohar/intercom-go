@@ -12,6 +12,15 @@ func TestConversationFind(t *testing.T) {
 	if convo.ID != "147" {
 		t.Errorf("Conversation not retrieved, %s", convo.ID)
 	}
+	if convo.TagList == nil || convo.TagList.Tags[0].ID != "12345" {
+		t.Errorf("Conversation tags not retrieved, %s", convo.ID)
+	}
+	if convo.ConversationMessage.ID != "537e564f316c33104c010020" {
+		t.Errorf("Conversation ID not retrieved, %s", convo.ConversationMessage.ID)
+	}
+	if convo.ConversationMessage.URL != "/the/page/url.html" {
+		t.Errorf("Conversation URL not retrieved, %s", convo.ConversationMessage.URL)
+	}
 }
 
 func TestConversationRead(t *testing.T) {
@@ -71,7 +80,7 @@ func TestConversationReplyWithAttachment(t *testing.T) {
 func TestConversationListAll(t *testing.T) {
 	http := TestConversationHTTPClient{t: t, expectedURI: "/conversations", fixtureFilename: "fixtures/conversations.json"}
 	api := ConversationAPI{httpClient: &http}
-	convos, _ := api.list(conversationListParams{})
+	convos, _ := api.list(ConversationListParams{})
 	if convos.Conversations[0].ID != "147" {
 		t.Errorf("Conversation not retrieved")
 	}
@@ -84,30 +93,33 @@ func TestConversationListAll(t *testing.T) {
 	if convos.Conversations[0].ConversationParts.Parts[0].CreatedAt != 1400857494 {
 		t.Errorf("Conversation Part CreatedAt not retrieved")
 	}
+	if convos.Conversations[0].TagList != nil {
+		t.Errorf("Conversation Tags should be nil")
+	}
 }
 
 func TestConversationListUserUnread(t *testing.T) {
 	http := TestConversationHTTPClient{t: t, expectedURI: "/conversations", fixtureFilename: "fixtures/conversations.json"}
 	http.testFunc = func(t *testing.T, queryParams interface{}) {
-		ps := queryParams.(conversationListParams)
+		ps := queryParams.(ConversationListParams)
 		if *ps.Unread != true {
 			t.Errorf("Expect unread parameter, got %v", *ps.Unread)
 		}
 	}
 	api := ConversationAPI{httpClient: &http}
-	api.list(conversationListParams{Unread: Bool(true)})
+	api.list(ConversationListParams{Unread: Bool(true)})
 }
 
 func TestConversationListAdminOpen(t *testing.T) {
 	http := TestConversationHTTPClient{t: t, expectedURI: "/conversations", fixtureFilename: "fixtures/conversations.json"}
 	http.testFunc = func(t *testing.T, queryParams interface{}) {
-		ps := queryParams.(conversationListParams)
+		ps := queryParams.(ConversationListParams)
 		if *ps.Open != true {
 			t.Errorf("Expect open parameter, got %v", *ps.Unread)
 		}
 	}
 	api := ConversationAPI{httpClient: &http}
-	api.list(conversationListParams{Open: Bool(true)})
+	api.list(ConversationListParams{Open: Bool(true)})
 }
 
 type TestConversationHTTPClient struct {

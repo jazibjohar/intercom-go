@@ -81,6 +81,7 @@ type UserIdentifiers struct {
 
 // UserAvatar represents an avatar for a User.
 type UserAvatar struct {
+	Type string `json:"type,omitempty"`
 	ImageURL string `json:"image_url,omitempty"`
 }
 
@@ -142,7 +143,7 @@ func (u *UserService) Delete(id string) (User, error) {
 	return u.Repository.delete(id)
 }
 
-// Get the address for an User in order to message them
+// MessageAddress gets the address for an User in order to message them
 func (u User) MessageAddress() MessageAddress {
 	return MessageAddress{
 		Type:   "user",
